@@ -5,6 +5,7 @@ import { Input, Table, Select, Radio } from "antd";
 import searchImg from "../../assets/search.svg";
 const {Option}=Select;
 function TransactionTable({ transactions ,addTransaction, fetchTransactions}){
+    const [selectedTag, setSelectedTag] = useState("");
     const [searchTerm,setSearchTerm]=useState("");
     const [typeFilter,setTypeFilter]=useState("");
     const [sortKey,setSortKey]=useState("");  
@@ -35,9 +36,15 @@ function TransactionTable({ transactions ,addTransaction, fetchTransactions}){
             key: 'date',
           },
       ];
-      let filterTransactions=[]//transactions.fiter((item)=>
-    //     item.name.toLowerCase().includes(search.toLowerCase()) && item.type.includes(typeFilter)
-    // );
+      const filterTransactions = transactions.filter((transaction) => {
+        const searchMatch = searchTerm
+          ? transaction.name.toLowerCase().includes(searchTerm.toLowerCase())
+          : true;
+        const tagMatch = selectedTag ? transaction.tag === selectedTag : true;
+        const typeMatch = typeFilter ? transaction.type === typeFilter : true;
+    
+        return searchMatch && tagMatch && typeMatch;
+      });
     let sortedTransactions=filterTransactions.sort((a, b) => {
         if (sortKey === "date") {
           return new Date(a.date) - new Date(b.date);
