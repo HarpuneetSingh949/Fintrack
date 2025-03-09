@@ -167,7 +167,7 @@ function SignupSigninComponent(){
         ):(
             <div className="signup-wrapper">
                 <h2 className="title">
-                    Log in <span style={{color: "var(--theme)"}}>FinTrack.</span>
+                    Signup on <span style={{color: "var(--theme)"}}>FinTrack.</span>
                 </h2>
                 <form>
                     <Input 
