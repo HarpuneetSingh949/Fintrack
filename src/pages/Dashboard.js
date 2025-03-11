@@ -5,7 +5,7 @@ import AddExpenseModal from "../components/Modals/addExpense";
 import AddIncomeModal from "../components/Modals/addIncome";
 import { toast } from "react-toastify";
 import { auth, db } from "../firebase";
-import { addDoc, collection, getDocs, query } from "firebase/firestore";
+import { addDoc, collection, getDocs, query, deleteDoc,doc} from "firebase/firestore";
 import { useAuthState } from "react-firebase-hooks/auth";
 import TransactionTable from "../components/TransactionsTable";
 import NoTransactions from "../components/NoTransactions";
@@ -21,7 +21,6 @@ function Dashboard(){
     const showExpenseModal = () => {
         setIsExpenseModalVisible(true);
     };
-    
     const showIncomeModal = () => {
         setIsIncomeModalVisible(true);
     };
@@ -100,9 +99,28 @@ function Dashboard(){
         setExpense(expensesTotal);
         setTotalBalance(incomeTotal - expensesTotal);
       };
-    let sortedTransactions=transactions.sort((a, b) => {
-          return new Date(a.date) - new Date(b.date);
-      });
+      async function reset() {
+          if (!user) return;
+          console.log("Resetting transactions...");
+          try {
+              const q = query(collection(db, `users/${user.uid}/transactions`));
+              const querySnapshot = await getDocs(q);
+              const deletePromises = querySnapshot.docs.map((docItem) => 
+                  deleteDoc(doc(db, `users/${user.uid}/transactions`, docItem.id))
+              );
+              await Promise.all(deletePromises);
+              setTransactions([]);
+              setIncome(0);
+              setExpense(0);
+              setTotalBalance(0);
+      
+              toast.success("All transactions have been reset!");
+          } catch (error) {
+              console.error("Error resetting transactions: ", error);
+              toast.error("Failed to reset transactions.");
+          }
+      }
+      
     return(
         <div>
             {loading?<p>Loading...</p>:<>
@@ -113,6 +131,7 @@ function Dashboard(){
                     totalBalance={totalBalance}
                     showExpenseModal={showExpenseModal}
                     showIncomeModal={showIncomeModal}
+                    reset={reset}
                 />
                 <AddExpenseModal
                 isExpenseModalVisible={isExpenseModalVisible}
@@ -124,7 +143,9 @@ function Dashboard(){
                 handleIncomeCancel={handleIncomeCancel}
                 onFinish={onFinish}
                 />
-                <TransactionTable transactions={transactions} addTransaction={addTransaction} fetchTransactions={fetchTransactions}/>
+                {transactions.length!==0?(
+                  <TransactionTable transactions={transactions} addTransaction={addTransaction} fetchTransactions={fetchTransactions}/>
+                ):(<NoTransactions />)}
           </>}
         </div>
     );

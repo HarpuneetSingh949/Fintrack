@@ -45,7 +45,7 @@ function TransactionTable({ transactions ,addTransaction, fetchTransactions}){
     
         return searchMatch && tagMatch && typeMatch;
       });
-    let sortedTransactions=filterTransactions.sort((a, b) => {
+    filterTransactions.sort((a, b) => {
         if (sortKey === "date") {
           return new Date(a.date) - new Date(b.date);
         } else if (sortKey === "amount") {
@@ -168,7 +168,7 @@ function TransactionTable({ transactions ,addTransaction, fetchTransactions}){
             />
           </div>
         </div>
-        <Table dataSource={transactions} columns={columns} />
+        <Table dataSource={filterTransactions} columns={columns} />
         </div>
     </div>
     )
